@@ -109,3 +109,29 @@ Similar encapsulation is applied to all nodes.
 An important part of work in defining launch file is to make sure that nodes communicate properly with each other. ROS adopting a Publisher/Subscriber model, where there is a publisher only send out message, and a subscriber only receive message. That is to say, defining node communication is connecting nodes with the correct topic from both publisher and subscriber sides. 
 
 In this section, I will take an example pair of node in our Robocon project to demonstrate how to connect topic between two nodes properly. The nodes I'm going to use is circle detector node and roi filter node. Here I think I should introduce their input/output relationship: the circle detector node take camera image as input, and output the cropped image according to the most possible circle in the image; then the cropped image is send to roi filter node by topic. 
+
+    <!-- Start ROI -->
+    <group if="$(arg roi)">
+        <node ns="$(arg veh)" name="circle_detector" pkg="circle_detector" type="circle_detector_node.py" output="screen">
+            <remap from="~image_compressed" to="usb_cam1/image_raw/compressed"/>
+        </node>
+  
+        <node ns="$(arg veh)" name="roi_filter" pkg="roi_filter" type="roi_filter_node.py" output="screen">
+            <remap from="~set_ref" to="move_planner_node/set_ref"/>
+            <remap from="~roi" to="circle_detector/roi"/>
+        </node>
+    </group>
+
+Notice the "remap" tags in the above code block, whose function is renaming the topics from the publisher and connect them to the subscriber. For example, the remap tag pair inside the circle detector node tag:
+
+    <remap from="~image_compressed" to="usb_cam1/image_raw/compressed"/>
+
+This line connect the "image_compressed" topic, which is defined in [code of the node](https://github.com/yxiao1996/RoboTop/blob/master/catkin_ws/src/10-objectdetection/circle_detector/src/circle_detector_node.py):
+
+    class CircleDetectorNode():
+        def __init__(self):
+        ...
+        self.sub_image = rospy.Subscriber("~image_compressed", CompressedImage, self.cbImage, queue_size=20)
+        ...
+
+To the "usb_cam1/image_raw/compressed" topic provided by the publisher usb_cam1 node.
