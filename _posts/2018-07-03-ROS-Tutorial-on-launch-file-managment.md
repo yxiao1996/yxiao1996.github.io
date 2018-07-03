@@ -134,4 +134,4 @@ This line connect the "image_compressed" topic, which is defined in [code of the
         self.sub_image = rospy.Subscriber("~image_compressed", CompressedImage, self.cbImage, queue_size=20)
         ...
 
-To the "usb_cam1/image_raw/compressed" topic provided by the publisher usb_cam1 node.
+To the "usb_cam1/image_raw/compressed" topic provided by the publisher usb_cam1 node. 
