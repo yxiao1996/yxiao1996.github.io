@@ -8,7 +8,7 @@ It's a nightmare for compilers to directly extract useful and hierachial informa
 
     var_x = var_x + y
 
-havs 5 tokens in it: 'var_x','=','var_x','+','y'. They are the lowest-level entities that compilers going to manipulate, like atoms in a computer program. By extract these symbols from the string, the compiler get rid of the inconvenience brought by the 1-dimensional input code. in the following stages, parser transform symbols into a tree structre which is proper for interpretation. 
+havs 5 tokens in it: 'var_x','EQULS','var_x','PLUS','y'. They are the lowest-level entities that compilers going to manipulate, like atoms in a computer program. By extract these symbols from the string, the compiler get rid of the inconvenience brought by the 1-dimensional input code. in the following stages, parser transform symbols into a tree structre which is proper for interpretation. 
 
 In general, there are many ways to build a scanner(or lexical analyser). You can manully code one, like the early day hackers, or you can automatically generate one with some kind of tool. The most famous one in these tools is **lex**, which is used since the 1970s to build tools in the Unix operating system, typically combined with another tool called **yacc**. The configuration code for lex typically contains three parts:
 * Tokens (tokens you want to preserved for the compiler's usage, like commands, operators, etc.)
@@ -16,3 +16,41 @@ In general, there are many ways to build a scanner(or lexical analyser). You can
 * additional C code for each regular expression (what do you want the compiler to do after finding each kind of token)
 
 In Python, lex module in PLY(python-lex-yacc) provide the same functionality as lex, with highly similar configuration rules. 
+
+Although PLY is a Python module, it is a bit different to other packages when using. When using classes in most of other Python packages, like numpy, OpenCV, or panda, etc. You do initializations through the __init__() functions built in the class. However, PLY does not applied this convention, but mimic what you have to do when using lex. So, when using PLY, you usually have to set up a configuration including several variables, and probably many functions in your python environment. Then you can call the lex funcion from PLY, and PLY will give you a scanner. 
+
+Now, let me briefly scatch out a piece of code using PLY to generate a scanner:
+
+    from ply import lex
+    
+    tokens = [TOKEN_0, TOKEN_1, ...]
+
+    def t_TOKEN_0(t):
+        r'(regular expression of TOKEN_0)'
+        # code about TOKEN_0
+        ...
+
+    def t_TOKEN_1(t):
+        r'(regular expression of TOKEN_1)'
+        # code about TOKEN_1
+        ...
+    
+    ...
+
+    lex
+
+Needless to mention, we have to import the module first, with:
+
+    from ply import lex
+
+Next, we have to set all the tokens' name in a list called **tokens**, may be we want a 'PLUS' operator, an 'EQUALS' operator, or some other kinds of symbols. Here, we put their names in a list:
+
+    tokens = [TOKEN_0, TOKEN_1, ...]
+
+After assigning names for each token, we have to define their behavior. To define this, we have to provide two parts of information for each token. We have to answer two questions for each token: How can we find the token in string? What do you want to do after finding the token? To do this, we define one function for each token. For example:
+
+    def t_TOKEN_0(t):
+        r'(regular expression of TOKEN_0)'
+        # code about TOKEN_0
+
+Each of these functions contains two part, first part is a regular expression, second part is the additional code. Scanner use the regular expression to find tokens in string, then run the additional code. 
